@@ -8,7 +8,7 @@ import ast
 import operator
 
 
-# --- SAFE CALCULATION LOGIC (Unchanged) ---
+# --- SAFE CALCULATION LOGIC  ---
 def safe_calculate(expression):
     try:
         if expression.endswith(('*', '/', '+', '-')):
@@ -46,7 +46,7 @@ full_expression = ""
 entry_cleared = True
 
 
-# --- GUI FUNCTIONS (Unchanged) ---
+# --- GUI FUNCTIONS ---
 def update_full_expression_display():
     full_expression_label.configure(text=full_expression)
 
@@ -123,7 +123,7 @@ def highlight_button(button):
     root.after(200, lambda: button.configure(fg_color=button.original_color))
 
 
-# --- GUI LAYOUT (Unchanged) ---
+# --- GUI LAYOUT ---
 display_frame = ctk.CTkFrame(root, corner_radius=0);
 display_frame.pack(fill="both", expand=True)
 full_expression_label = ctk.CTkLabel(display_frame, text="", font=("Arial", 20), anchor="e");
@@ -189,7 +189,7 @@ def create_instructions_window():
         desc_label.grid(row=i, column=1, padx=10, pady=5, sticky="w")
 
 
-# --- MEDIAPIPE AND GESTURE LOGIC (Unchanged) ---
+# --- MEDIAPIPE AND GESTURE LOGIC ---
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2, min_detection_confidence=0.7,
                        min_tracking_confidence=0.7)
