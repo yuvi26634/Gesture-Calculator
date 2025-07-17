@@ -8,7 +8,7 @@ import ast
 import operator
 
 
-# --- SAFE CALCULATION LOGIC  ---
+# --- SAFE CALCULATION LOGIC ---
 def safe_calculate(expression):
     try:
         if expression.endswith(('*', '/', '+', '-')):
@@ -42,104 +42,89 @@ root = ctk.CTk()
 root.title("Gesture Calculator")
 root.geometry("380x520")
 buttons = {}
-full_expression = ""
 entry_cleared = True
 
 
 # --- GUI FUNCTIONS ---
-def update_full_expression_display():
-    full_expression_label.configure(text=full_expression)
-
-
 def update_entry_display(value):
     entry_label.configure(text=str(value))
 
 
 def backspace():
-    global entry_cleared
     current_text = entry_label.cget("text")
-    if current_text != "0" and current_text != "Error" and not entry_cleared:
+    if current_text != "0" and current_text != "Error":
         new_text = current_text[:-1]
-        if not new_text:
-            update_entry_display("0")
-            entry_cleared = True
-        else:
-            update_entry_display(new_text)
+        update_entry_display(new_text if new_text else "0")
 
 
 def button_press(symbol):
-    global full_expression, entry_cleared
-    if str(symbol) in "0123456789":
-        current_text = entry_label.cget("text")
+    global entry_cleared
+    current_text = entry_label.cget("text")
+    symbol_str = str(symbol)
+
+    if symbol_str in "0123456789":
         if current_text == "0" or entry_cleared:
-            update_entry_display(symbol)
+            update_entry_display(symbol_str)
             entry_cleared = False
         else:
-            update_entry_display(current_text + str(symbol))
-    elif symbol == ".":
-        current_text = entry_label.cget("text")
-        if "." not in current_text and current_text != "Error":
+            update_entry_display(current_text + symbol_str)
+    elif symbol_str == ".":
+        if "." not in current_text and not entry_cleared:
             update_entry_display(current_text + ".")
-            entry_cleared = False
-    elif str(symbol) in "+-*/":
-        current_text = entry_label.cget("text")
-        if not full_expression.endswith(('* ', '/ ', '+ ', '- ')):
-            full_expression += str(current_text) + f" {str(symbol)} "
-        update_full_expression_display()
-        entry_cleared = True
-    elif symbol == "C":
+    elif symbol_str in "+-*/":
+        if current_text and not current_text.endswith(tuple("+-*/")):
+            update_entry_display(current_text + symbol_str)
+        entry_cleared = False
+    elif symbol_str == "C":
         clear_display()
-    elif symbol == "=":
+    elif symbol_str == "=":
         calculate_result()
-    elif symbol == "⌫":
+    elif symbol_str == "⌫":
         backspace()
-    if str(symbol) in buttons: highlight_button(buttons[str(symbol)])
+
+    if symbol_str in buttons:
+        highlight_button(buttons[symbol_str])
 
 
 def clear_display():
-    global full_expression, entry_cleared
-    full_expression = "";
-    update_full_expression_display()
-    update_entry_display("0");
+    global entry_cleared
+    update_entry_display("0")
     entry_cleared = True
 
 
 def calculate_result():
-    global full_expression, entry_cleared
-    current_text = entry_label.cget("text")
-    full_expression += str(current_text)
+    global entry_cleared
+    expression = entry_label.cget("text")
     try:
-        result = safe_calculate(full_expression.replace(" ", ""))
+        result = safe_calculate(expression)
         update_entry_display(round(result, 10))
     except ValueError:
         update_entry_display("Error")
-    full_expression = "";
-    update_full_expression_display()
     entry_cleared = True
 
 
 def highlight_button(button):
+    original_color = button.original_color
     button.configure(fg_color="#00BF63")
-    root.after(200, lambda: button.configure(fg_color=button.original_color))
+    root.after(200, lambda: button.configure(fg_color=original_color))
 
 
 # --- GUI LAYOUT ---
-display_frame = ctk.CTkFrame(root, corner_radius=0);
+display_frame = ctk.CTkFrame(root, corner_radius=0)
 display_frame.pack(fill="both", expand=True)
-full_expression_label = ctk.CTkLabel(display_frame, text="", font=("Arial", 20), anchor="e");
-full_expression_label.pack(fill="x", padx=10, pady=(10, 0))
-entry_label = ctk.CTkLabel(display_frame, text="0", font=("Arial", 60, "bold"), anchor="e");
-entry_label.pack(fill="x", padx=10, pady=(0, 10))
-button_frame = ctk.CTkFrame(root, corner_radius=0);
-button_frame.pack(fill="both", expand=True, side="bottom")
+entry_label = ctk.CTkLabel(display_frame, text="0", font=("Arial", 60, "bold"), anchor="e")
+entry_label.pack(fill="both", expand=True, padx=10, pady=10)
+
+button_frame = ctk.CTkFrame(root, corner_radius=0)
+button_frame.pack(fill="both", expand=True, side="bottom", pady=(0, 5))
 button_layout = [
-    ('C', 1, 0), ('⌫', 1, 1), ('/', 1, 3),
-    ('7', 2, 0), ('8', 2, 1), ('9', 2, 2), ('*', 2, 3),
-    ('4', 3, 0), ('5', 3, 1), ('6', 3, 2), ('-', 3, 3),
-    ('1', 4, 0), ('2', 4, 1), ('3', 4, 2), ('+', 4, 3),
-    ('0', 5, 0, 2), ('.', 5, 2), ('=', 5, 3)
+    ('C', 0, 0), ('⌫', 0, 1), ('/', 0, 3),
+    ('7', 1, 0), ('8', 1, 1), ('9', 1, 2), ('*', 1, 3),
+    ('4', 2, 0), ('5', 2, 1), ('6', 2, 2), ('-', 2, 3),
+    ('1', 3, 0), ('2', 3, 1), ('3', 3, 2), ('+', 3, 3),
+    ('0', 4, 0, 2), ('.', 4, 2), ('=', 4, 3)
 ]
-for i in range(1, 6): button_frame.grid_rowconfigure(i, weight=1)
+for i in range(5): button_frame.grid_rowconfigure(i, weight=1)
 for i in range(4): button_frame.grid_columnconfigure(i, weight=1)
 for (text, row, col, *span) in button_layout:
     colspan = span[0] if span else 1
@@ -154,23 +139,22 @@ for (text, row, col, *span) in button_layout:
         command=lambda t=text: button_press(t), fg_color=color
     )
     button.grid(row=row, column=col, columnspan=colspan, sticky="nsew", padx=5, pady=5)
-    button.original_color = color;
+    button.original_color = color
     buttons[text] = button
 
 
-# --- NEW: INSTRUCTIONS WINDOW ---
+# --- INSTRUCTIONS WINDOW ---
 def create_instructions_window():
     instructions_window = ctk.CTkToplevel(root)
     instructions_window.title("Gesture Instructions")
     instructions_window.geometry("450x350")
-    instructions_window.transient(root)  # Keep on top of the main window
+    instructions_window.transient(root)
 
     ctk.CTkLabel(instructions_window, text="Gesture Guide", font=("Arial", 20, "bold")).pack(pady=10)
-
-    # Use a frame and grid for clean layout
     frame = ctk.CTkFrame(instructions_window)
     frame.pack(pady=10, padx=20, fill="both", expand=True)
 
+    # UPDATED: Added Backspace instruction
     gestures = {
         "👍": "Add (+): Thumbs Up",
         "👎": "Decimal (.): Thumbs Down",
@@ -179,7 +163,7 @@ def create_instructions_window():
         "👆+👆": "Divide (/): Two Index Fingers",
         "👌": "Equals (=): OK Sign",
         "🤙": "Clear (C): Call Me Sign",
-        "👍 (L-shape)": "Backspace (⌫): L-Shape"
+        "L": "Backspace (⌫): L-Shape"  # NEW
     }
 
     for i, (icon, desc) in enumerate(gestures.items()):
@@ -189,21 +173,11 @@ def create_instructions_window():
         desc_label.grid(row=i, column=1, padx=10, pady=5, sticky="w")
 
 
-# --- MEDIAPIPE AND GESTURE LOGIC ---
+# --- MEDIAPIPE & GESTURE DETECTION ---
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2, min_detection_confidence=0.7,
                        min_tracking_confidence=0.7)
 mp_draw = mp.solutions.drawing_utils
-
-
-def get_finger_orientation(landmarks, tip_id, base_id):
-    tip = landmarks[tip_id];
-    base = landmarks[base_id]
-    dx = abs(tip.x - base.x);
-    dy = abs(tip.y - base.y)
-    if dy > dx * 1.5: return "vertical"
-    if dx > dy * 1.5: return "horizontal"
-    return "diagonal"
 
 
 def camera_loop():
@@ -223,10 +197,8 @@ def camera_loop():
         current_symbol, hand_present_now = None, bool(results.multi_hand_landmarks)
 
         if hand_present_now:
-            # Draw landmarks on the clean camera feed
             for hand_landmarks in results.multi_hand_landmarks:
                 mp_draw.draw_landmarks(img, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-
             if not action_taken_this_session:
                 num_hands = len(results.multi_hand_landmarks)
                 all_hands_fingers, total_fingers = [], 0
@@ -296,8 +268,6 @@ def camera_loop():
 camera_thread = Thread(target=camera_loop, daemon=True)
 camera_thread.start()
 
-# NEW: Create the instructions window when the app starts
 create_instructions_window()
 
-# Launch GUI
 root.mainloop()
