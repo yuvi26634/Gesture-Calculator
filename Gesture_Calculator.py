@@ -163,7 +163,7 @@ def create_instructions_window():
         "👆+👆": "Divide (/): Two Index Fingers",
         "👌": "Equals (=): OK Sign",
         "🤙": "Clear (C): Call Me Sign",
-        "L": "Backspace (⌫): L-Shape"  # NEW
+        "L": "Backspace (⌫): L-Shape" 
     }
 
     for i, (icon, desc) in enumerate(gestures.items()):
